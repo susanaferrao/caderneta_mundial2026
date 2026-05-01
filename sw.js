@@ -1,7 +1,10 @@
-const CACHE = 'mundial2026-v1';
+const CACHE = 'mundial2026-v2';
+const BASE = '/caderneta_mundial2026/';
 const ASSETS = [
-  '/caderneta2026.html',
-  '/manifest.json'
+  BASE + 'caderneta2026.html',
+  BASE + 'manifest.json',
+  BASE + 'icon-192.png',
+  BASE + 'icon-512.png'
 ];
 
 self.addEventListener('install', function(e) {
@@ -27,7 +30,9 @@ self.addEventListener('activate', function(e) {
 self.addEventListener('fetch', function(e) {
   e.respondWith(
     caches.match(e.request).then(function(cached) {
-      return cached || fetch(e.request).catch(function() { return caches.match('/caderneta2026.html'); });
+      return cached || fetch(e.request).catch(function() {
+        return caches.match(BASE + 'caderneta2026.html');
+      });
     })
   );
 });
