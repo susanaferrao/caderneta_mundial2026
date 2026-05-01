@@ -523,61 +523,61 @@ function doPrint(){
     +'*{box-sizing:border-box;margin:0;padding:0}'
     +'body{font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#111;padding:10mm}'
     +'h1{font-size:15px;font-weight:700;margin:0 0 2px}'
-    +'.meta{font-size:9px;color:#666;margin-bottom:12px}'
-    +'.stitle{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding-bottom:3px;margin:14px 0 8px;border-bottom:2px solid #111}'
+    +'.meta{font-size:9px;color:#666;margin-bottom:14px}'
+    +'.stitle{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding-bottom:3px;margin:16px 0 8px;border-bottom:2px solid #111}'
     +'.stitle.h{border-color:#2EB87A;color:#155E3B}'
     +'.stitle.d{border-color:#F47C20;color:#7A3C0A}'
     +'.stitle.m{border-color:#E8334A;color:#7A1520}'
-    +'.gb{margin-bottom:8px}'
-    +'.gl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#555;margin-bottom:4px}'
-    +'.pills{display:flex;flex-wrap:wrap;gap:3px}'
-    +'.p{font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;border:1px solid}'
-    +'.ph{background:#E6F8EF;color:#155E3B;border-color:#2EB87A}'
-    +'.pd{background:#FEF3E2;color:#7A3C0A;border-color:#F47C20}'
-    +'.pm{background:#FDE8EB;color:#7A1520;border-color:#E8334A}'
+    +'.grp-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#555;margin:10px 0 4px;padding-top:6px;border-top:1px solid #ddd}'
+    +'.team-row{display:flex;align-items:baseline;gap:6px;margin-bottom:4px;line-height:1.5}'
+    +'.team-lbl{font-size:10px;font-weight:700;color:#333;white-space:nowrap;min-width:110px}'
+    +'.codes{font-size:10px;color:#111;flex:1;flex-wrap:wrap}'
+    +'.code-h{color:#155E3B;font-weight:600}'
+    +'.code-d{color:#7A3C0A;font-weight:600}'
+    +'.code-m{color:#7A1520;font-weight:600}'
     +'@media print{@page{margin:10mm}body{padding:0}}'
     +'</style>';
 
   var body='<h1>Caderneta FIFA World Cup 2026 &mdash; Panini</h1>'
     +'<div class="meta">Impresso em '+dt+'</div>';
 
-  if(PDF_SEL.hav){
-    var tot=0;var blk='';
+  function buildByTeam(filterFn, codeCls) {
+    var blk=''; var tot=0;
     GO.forEach(function(gk){
-      var items=[];
+      var grpHtml='';
       TEAMS.filter(function(t){return t.grpKey===gk;}).forEach(function(t){
-        t.stickers.forEach(function(s){var st=gs(s.id);if(st>0)items.push({id:s.id,isDup:st===2});});
+        var codes=[];
+        t.stickers.forEach(function(s){
+          var st=gs(s.id);
+          if(filterFn(st)) codes.push({id:s.id,isDup:st===2});
+        });
+        if(!codes.length)return;
+        tot+=codes.length;
+        var codesStr=codes.map(function(c){
+          var cls=c.isDup?'code-d':codeCls;
+          return '<span class="'+cls+'">'+c.id+(c.isDup?' x2':'')+'</span>';
+        }).join(' &nbsp;');
+        grpHtml+='<div class="team-row"><span class="team-lbl">'+t.name+'</span><span class="codes">'+codesStr+'</span></div>';
       });
-      if(!items.length)return;
-      tot+=items.length;
-      blk+='<div class="gb"><div class="gl">'+GRP[gk].label+'</div><div class="pills">'
-        +items.map(function(it){return '<span class="p '+(it.isDup?'pd':'ph')+'">'+it.id+(it.isDup?' x2':'')+'</span>';}).join('')
-        +'</div></div>';
+      if(!grpHtml)return;
+      blk+='<div class="grp-title">'+GRP[gk].label+'</div>'+grpHtml;
     });
-    body+='<div class="stitle h">Cromos que tenho ('+tot+')</div>'+blk;
+    return {html:blk, tot:tot};
+  }
+
+  if(PDF_SEL.hav){
+    var r=buildByTeam(function(st){return st>0;},'code-h');
+    body+='<div class="stitle h">Cromos que tenho ('+r.tot+')</div>'+r.html;
   }
 
   if(PDF_SEL.dup){
-    var dups=[];
-    TEAMS.forEach(function(t){t.stickers.forEach(function(s){if(gs(s.id)===2)dups.push(s.id);});});
-    body+='<div class="stitle d">Para trocar ('+dups.length+')</div>'
-      +'<div class="pills">'+dups.map(function(id){return '<span class="p pd">'+id+'</span>';}).join('')+'</div>';
+    var r2=buildByTeam(function(st){return st===2;},'code-d');
+    body+='<div class="stitle d">Para trocar ('+r2.tot+')</div>'+r2.html;
   }
 
   if(PDF_SEL.mis){
-    var tot2=0;var blk2='';
-    GO.forEach(function(gk){
-      var miss=[];
-      TEAMS.filter(function(t){return t.grpKey===gk;}).forEach(function(t){
-        t.stickers.forEach(function(s){if(gs(s.id)===0)miss.push(s.id);});
-      });
-      if(!miss.length)return;
-      tot2+=miss.length;
-      blk2+='<div class="gb"><div class="gl">'+GRP[gk].label+'</div><div class="pills">'
-        +miss.map(function(id){return '<span class="p pm">'+id+'</span>';}).join('')
-        +'</div></div>';
-    });
-    body+='<div class="stitle m">Cromos que faltam ('+tot2+')</div>'+blk2;
+    var r3=buildByTeam(function(st){return st===0;},'code-m');
+    body+='<div class="stitle m">Cromos que faltam ('+r3.tot+')</div>'+r3.html;
   }
 
   document.getElementById('print-area').innerHTML=css+body;
