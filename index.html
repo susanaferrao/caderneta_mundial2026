@@ -155,8 +155,9 @@ body { font-family: var(--fb); background: var(--surface); color: var(--text); m
 .pdf-opt-count { font-family: var(--fd); font-size: 14px; font-weight: 600; color: var(--muted); flex-shrink: 0; min-width: 28px; text-align: right; }
 .modal-actions { display: flex; gap: 10px; }
 .btn-cancel { flex: 1; padding: 13px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); font-family: var(--fd); font-size: 15px; font-weight: 600; color: var(--muted); cursor: pointer; -webkit-tap-highlight-color: transparent; }
-.btn-export { flex: 2; padding: 13px; background: var(--red); border: none; border-radius: var(--radius); font-family: var(--fd); font-size: 15px; font-weight: 700; color: #fff; cursor: pointer; -webkit-tap-highlight-color: transparent; letter-spacing: .04em; }
+.btn-export { flex: 1; padding: 13px; background: var(--red); border: none; border-radius: var(--radius); font-family: var(--fd); font-size: 15px; font-weight: 700; color: #fff; cursor: pointer; -webkit-tap-highlight-color: transparent; letter-spacing: .04em; }
 .btn-export:disabled { opacity: .4; cursor: default; }
+.btn-save { background: var(--dark); }
 
 /* PRINT */
 @media print {
@@ -281,7 +282,8 @@ body { font-family: var(--fb); background: var(--surface); color: var(--text); m
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closePdfModal()">Cancelar</button>
-      <button class="btn-export" id="btn-export" onclick="doPrint()">Imprimir / PDF</button>
+      <button class="btn-export" id="btn-export" onclick="doPrint('print')">Imprimir</button>
+      <button class="btn-export btn-save" id="btn-save" onclick="doPrint('save')">Guardar PDF</button>
     </div>
   </div>
 </div>
@@ -290,7 +292,7 @@ body { font-family: var(--fb); background: var(--surface); color: var(--text); m
 
 <script>
 /* === DADOS === */
-var TT = ['Escudo','Jog 1','Jog 2','Jog 3','Jog 4','Jog 5','Jog 6','Jog 7','Jog 8','Jog 9','Jog 10','Jog 11','Jog 12','Foto equipa','Jog 13','Jog 14','Jog 15','Jog 16','Jog 17','Jog 18'];
+var TT = ['Escudo','Jog 1','Jog 2','Jog 3','Jog 4','Jog 5','Jog 6','Jog 7','Jog 8','Jog 9','Jog 10','Jog 11','Foto equipa','Jog 12','Jog 13','Jog 14','Jog 15','Jog 16','Jog 17','Jog 18'];
 
 function mt(code,name,flag,grp,pages,n){
   n=n||20;
@@ -523,48 +525,47 @@ function toggleOpt(key){
   updateExportBtn();
 }
 function updateExportBtn(){
-  document.getElementById('btn-export').disabled=!(PDF_SEL.hav||PDF_SEL.dup||PDF_SEL.mis||PDF_SEL.chk);
+  var any=PDF_SEL.hav||PDF_SEL.dup||PDF_SEL.mis||PDF_SEL.chk;
+  document.getElementById('btn-export').disabled=!any;
+  document.getElementById('btn-save').disabled=!any;
 }
 
-function doPrint(){
+function doPrint(mode){
   var now=new Date();
   var dt=now.getDate()+'/'+(now.getMonth()+1)+'/'+now.getFullYear();
 
   var css='<style>'
     +'*{box-sizing:border-box;margin:0;padding:0}'
-    +'body{font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#111;padding:10mm}'
-    +'h1{font-size:15px;font-weight:700;margin:0 0 2px}'
-    +'.meta{font-size:9px;color:#666;margin-bottom:14px}'
-    +'.print-hint{font-size:9px;color:#888;margin-bottom:14px;padding:5px 8px;border:1px dashed #ccc;border-radius:3px}'
-    +'.stitle{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding-bottom:3px;margin:16px 0 8px;border-bottom:2px solid #111}'
+    +'body{font-family:Arial,Helvetica,sans-serif;font-size:10px;color:#111;}'
+    +'h1{font-size:14px;font-weight:700;margin:0 0 1px}'
+    +'.meta{font-size:8px;color:#666;margin-bottom:10px}'
+    +'.stitle{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding-bottom:2px;margin:12px 0 6px;border-bottom:2px solid #111}'
     +'.stitle.h{border-color:#2EB87A;color:#155E3B}'
     +'.stitle.d{border-color:#F47C20;color:#7A3C0A}'
     +'.stitle.m{border-color:#E8334A;color:#7A1520}'
     +'.stitle.chk{border-color:#2D7DD2;color:#1A4A7A}'
-    +'.grp-block{margin-bottom:10px}'
-    +'.grp-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#555;margin:10px 0 4px;padding-top:6px;border-top:1px solid #ddd}'
-    +'.team-row{display:flex;align-items:baseline;gap:6px;margin-bottom:4px;line-height:1.5}'
-    +'.team-lbl{font-size:10px;font-weight:700;color:#333;white-space:nowrap;min-width:130px}'
-    +'.codes{font-size:10px;color:#111;flex:1}'
+    +'.grp-block{margin-bottom:6px}'
+    +'.grp-label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#555;margin:7px 0 3px;padding-top:4px;border-top:1px solid #ddd}'
+    +'.team-row{display:flex;align-items:baseline;gap:5px;margin-bottom:2px;line-height:1.4}'
+    +'.team-lbl{font-size:9px;font-weight:700;color:#333;white-space:nowrap;min-width:120px}'
+    +'.codes{font-size:9px;color:#111;flex:1}'
     +'.code-h{color:#155E3B;font-weight:600}'
     +'.code-d{color:#7A3C0A;font-weight:600}'
     +'.code-m{color:#7A1520;font-weight:600}'
-    /* checklist table */
-    +'.ck-team{margin-bottom:8px}'
-    +'.ck-name{font-size:10px;font-weight:700;color:#222;margin-bottom:3px}'
-    +'.ck-table{display:grid;grid-template-columns:repeat(20,1fr);gap:2px}'
-    +'.ck-cell{position:relative;border:1px solid #bbb;border-radius:2px;text-align:center;font-size:8px;font-weight:600;color:#333;padding:3px 1px;overflow:hidden;background:#fff;line-height:1.2}'
-    +'.ck-cell.done{color:#aaa;background:#f5f5f5;border-color:#ddd}'
-    +'.ck-cell.done::before{'
-    +'content:"";position:absolute;top:0;left:0;right:0;bottom:0;'
-    +'background:linear-gradient(to bottom right,transparent calc(50% - 0.5px),#999 calc(50% - 0.5px),#999 calc(50% + 0.5px),transparent calc(50% + 0.5px));'
-    +'pointer-events:none}'
-    +'@media print{@page{margin:8mm;size:A4 landscape}body{padding:0}.print-hint{display:none}}'
+    /* checklist compacta */
+    +'.ck-team{margin-bottom:4px;page-break-inside:avoid}'
+    +'.ck-name{font-size:8px;font-weight:700;color:#222;margin-bottom:2px}'
+    +'.ck-table{display:grid;grid-template-columns:repeat(20,1fr);gap:1px}'
+    +'.ck-cell{position:relative;border:0.5px solid #bbb;border-radius:1px;text-align:center;font-size:6.5px;font-weight:600;color:#333;padding:2px 0;overflow:hidden;background:#fff;line-height:1.1}'
+    +'.ck-cell.done{color:#bbb;background:#f5f5f5;border-color:#ddd}'
+    +'.ck-cell.done::before{content:"";position:absolute;top:0;left:0;right:0;bottom:0;'
+    +'background:linear-gradient(to bottom right,transparent calc(50% - 0.4px),#999 calc(50% - 0.4px),#999 calc(50% + 0.4px),transparent calc(50% + 0.4px));}'
+    +'@page{margin:8mm;size:A4}'
+    +'body{padding:6mm}'
     +'</style>';
 
   var body='<h1>Caderneta FIFA World Cup 2026 &mdash; Panini</h1>'
-    +'<div class="meta">Impresso em '+dt+'</div>'
-    +'<div class="print-hint">Para guardar como PDF: no dialogo de impressao escolhe "Guardar como PDF" ou "Microsoft Print to PDF" como impressora.</div>';
+    +'<div class="meta">Impresso em '+dt+'</div>';
 
   function buildByTeam(filterFn, codeCls) {
     var blk=''; var tot=0;
@@ -591,18 +592,10 @@ function doPrint(){
     return {html:blk, tot:tot};
   }
 
-  if(PDF_SEL.hav){
-    var r=buildByTeam(function(st){return st>0;},'code-h');
-    body+='<div class="stitle h">Cromos que tenho ('+r.tot+')</div>'+r.html;
-  }
-  if(PDF_SEL.dup){
-    var r2=buildByTeam(function(st){return st===2;},'code-d');
-    body+='<div class="stitle d">Para trocar ('+r2.tot+')</div>'+r2.html;
-  }
-  if(PDF_SEL.mis){
-    var r3=buildByTeam(function(st){return st===0;},'code-m');
-    body+='<div class="stitle m">Cromos que faltam ('+r3.tot+')</div>'+r3.html;
-  }
+  if(PDF_SEL.hav){var r=buildByTeam(function(st){return st>0;},'code-h');body+='<div class="stitle h">Cromos que tenho ('+r.tot+')</div>'+r.html;}
+  if(PDF_SEL.dup){var r2=buildByTeam(function(st){return st===2;},'code-d');body+='<div class="stitle d">Para trocar ('+r2.tot+')</div>'+r2.html;}
+  if(PDF_SEL.mis){var r3=buildByTeam(function(st){return st===0;},'code-m');body+='<div class="stitle m">Cromos que faltam ('+r3.tot+')</div>'+r3.html;}
+
   if(PDF_SEL.chk){
     var chkBlk='';
     GO.forEach(function(gk){
@@ -610,8 +603,7 @@ function doPrint(){
       TEAMS.filter(function(t){return t.grpKey===gk;}).forEach(function(t){
         var fl=t.flag?t.flag+' ':'';
         var cells=t.stickers.map(function(s){
-          var st=gs(s.id);
-          var cls=st>0?' done':'';
+          var cls=gs(s.id)>0?' done':'';
           return '<div class="ck-cell'+cls+'">'+s.id+'</div>';
         }).join('');
         grpHtml+='<div class="ck-team"><div class="ck-name">'+fl+t.name+'</div><div class="ck-table">'+cells+'</div></div>';
@@ -622,9 +614,23 @@ function doPrint(){
     body+='<div class="stitle chk">Checklist completa ('+TOTAL+')</div>'+chkBlk;
   }
 
-  document.getElementById('print-area').innerHTML=css+body;
+  var full='<!DOCTYPE html><html><head><meta charset="UTF-8">'+css+'</head><body>'+body+'</body></html>';
+
   closePdfModal();
-  setTimeout(function(){window.print();},200);
+
+  if(mode==='save'){
+    var blob=new Blob([full],{type:'text/html;charset=utf-8'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url;
+    a.download='caderneta2026.html';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){URL.revokeObjectURL(url);document.body.removeChild(a);},1000);
+  } else {
+    document.getElementById('print-area').innerHTML=full;
+    setTimeout(function(){window.print();document.getElementById('print-area').innerHTML='';},200);
+  }
 }
 
 /* === INIT === */
