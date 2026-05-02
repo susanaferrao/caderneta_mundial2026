@@ -290,7 +290,7 @@ body { font-family: var(--fb); background: var(--surface); color: var(--text); m
 
 <script>
 /* === DADOS === */
-var TT = ['Escudo','Foto equipa','Jog 1','Jog 2','Jog 3','Jog 4','Jog 5','Jog 6','Jog 7','Jog 8','Jog 9','Jog 10','Jog 11','Jog 12','Jog 13','Jog 14','Jog 15','Jog 16','Jog 17','Jog 18'];
+var TT = ['Escudo','Jog 1','Jog 2','Jog 3','Jog 4','Jog 5','Jog 6','Jog 7','Jog 8','Jog 9','Jog 10','Jog 11','Jog 12','Foto equipa','Jog 13','Jog 14','Jog 15','Jog 16','Jog 17','Jog 18'];
 
 function mt(code,name,flag,grp,pages,n){
   n=n||20;
@@ -535,6 +535,7 @@ function doPrint(){
     +'body{font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#111;padding:10mm}'
     +'h1{font-size:15px;font-weight:700;margin:0 0 2px}'
     +'.meta{font-size:9px;color:#666;margin-bottom:14px}'
+    +'.print-hint{font-size:9px;color:#888;margin-bottom:14px;padding:5px 8px;border:1px dashed #ccc;border-radius:3px}'
     +'.stitle{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding-bottom:3px;margin:16px 0 8px;border-bottom:2px solid #111}'
     +'.stitle.h{border-color:#2EB87A;color:#155E3B}'
     +'.stitle.d{border-color:#F47C20;color:#7A3C0A}'
@@ -548,15 +549,22 @@ function doPrint(){
     +'.code-h{color:#155E3B;font-weight:600}'
     +'.code-d{color:#7A3C0A;font-weight:600}'
     +'.code-m{color:#7A1520;font-weight:600}'
-    +'.ck-team{margin-bottom:6px}'
-    +'.ck-name{font-size:10px;font-weight:700;color:#333;margin-bottom:3px}'
-    +'.ck-pills{display:flex;flex-wrap:wrap;gap:3px}'
-    +'.ck-pill{font-size:9px;font-weight:600;padding:1px 5px;border:1px solid #ccc;border-radius:3px;background:#f9f9f9;color:#111}'
-    +'@media print{@page{margin:10mm}body{padding:0}}'
+    /* checklist table */
+    +'.ck-team{margin-bottom:8px}'
+    +'.ck-name{font-size:10px;font-weight:700;color:#222;margin-bottom:3px}'
+    +'.ck-table{display:grid;grid-template-columns:repeat(20,1fr);gap:2px}'
+    +'.ck-cell{position:relative;border:1px solid #bbb;border-radius:2px;text-align:center;font-size:8px;font-weight:600;color:#333;padding:3px 1px;overflow:hidden;background:#fff;line-height:1.2}'
+    +'.ck-cell.done{color:#aaa;background:#f5f5f5;border-color:#ddd}'
+    +'.ck-cell.done::before{'
+    +'content:"";position:absolute;top:0;left:0;right:0;bottom:0;'
+    +'background:linear-gradient(to bottom right,transparent calc(50% - 0.5px),#999 calc(50% - 0.5px),#999 calc(50% + 0.5px),transparent calc(50% + 0.5px));'
+    +'pointer-events:none}'
+    +'@media print{@page{margin:8mm;size:A4 landscape}body{padding:0}.print-hint{display:none}}'
     +'</style>';
 
   var body='<h1>Caderneta FIFA World Cup 2026 &mdash; Panini</h1>'
-    +'<div class="meta">Impresso em '+dt+'</div>';
+    +'<div class="meta">Impresso em '+dt+'</div>'
+    +'<div class="print-hint">Para guardar como PDF: no dialogo de impressao escolhe "Guardar como PDF" ou "Microsoft Print to PDF" como impressora.</div>';
 
   function buildByTeam(filterFn, codeCls) {
     var blk=''; var tot=0;
@@ -601,12 +609,12 @@ function doPrint(){
       var grpHtml='';
       TEAMS.filter(function(t){return t.grpKey===gk;}).forEach(function(t){
         var fl=t.flag?t.flag+' ':'';
-        var pills=t.stickers.map(function(s){
+        var cells=t.stickers.map(function(s){
           var st=gs(s.id);
-          var style=st>0?'text-decoration:line-through;color:#aaa;background:#f0f0f0;border-color:#ddd;':'';
-          return '<span class="ck-pill" style="'+style+'">'+s.id+'</span>';
+          var cls=st>0?' done':'';
+          return '<div class="ck-cell'+cls+'">'+s.id+'</div>';
         }).join('');
-        grpHtml+='<div class="ck-team"><div class="ck-name">'+fl+t.name+'</div><div class="ck-pills">'+pills+'</div></div>';
+        grpHtml+='<div class="ck-team"><div class="ck-name">'+fl+t.name+'</div><div class="ck-table">'+cells+'</div></div>';
       });
       if(!grpHtml)return;
       chkBlk+='<div class="grp-block"><div class="grp-label">'+GRP[gk].label+'</div>'+grpHtml+'</div>';
