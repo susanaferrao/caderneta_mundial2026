@@ -628,8 +628,11 @@ function doPrint(mode){
     a.click();
     setTimeout(function(){URL.revokeObjectURL(url);document.body.removeChild(a);},1000);
   } else {
-    document.getElementById('print-area').innerHTML=full;
-    setTimeout(function(){window.print();document.getElementById('print-area').innerHTML='';},200);
+    var w=window.open('','_blank');
+    w.document.write(full);
+    w.document.close();
+    w.focus();
+    setTimeout(function(){w.print();},400);
   }
 }
 
